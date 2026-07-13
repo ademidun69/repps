@@ -93,7 +93,7 @@ const LANDING_HTML = `<!doctype html>
   </div>
 
   <h2 id="how">How an agent calls ReppS</h2>
-  <pre><code>POST https://repps.onrender.com/api/challenge
+  <pre><code>POST https://repps.xyz/api/challenge
 Content-Type: application/json
 
 {
