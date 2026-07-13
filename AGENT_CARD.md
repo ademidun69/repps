@@ -12,8 +12,8 @@
 | **Tagline** | The devil's advocate your agent calls before it acts. |
 | **Service description** | ReppS is an adversarial review service for AI agents. Before an agent swaps, sends, hires, deploys, or commits to any non-trivial action, it calls ReppS. ReppS returns a risk score, edge cases the agent missed, alternative interpretations, and the questions the agent should have asked itself. Built for the OKX.AI Genesis Hackathon. |
 | **Category** | Software Utility (primary), Best Product (secondary), Social Buzz (secondary) |
-| **Service URL** | `https://repps.onrender.com` |
-| **Manifest** | `https://repps.onrender.com/.well-known/x402` |
+| **Service URL** | `https://repps.xyz` |
+| **Manifest** | `https://repps.xyz/.well-known/x402` |
 | **Repo** | `https://github.com/ademidun69/repps` |
 
 ## Vendor
@@ -72,24 +72,24 @@
 
 ```bash
 # Free tier — works without payment
-curl -X POST https://repps.onrender.com/api/quick_check \
+curl -X POST https://repps.xyz/api/quick_check \
   -H "Content-Type: application/json" \
   -d '{"action_type":"swap","params":{"token_out":"MEME","slippage_pct":12,"pool_liquidity_usd":8000,"amount":"10000"},"context":{"agent_id":"reviewer-test"}}'
 
 # Manifest
-curl https://repps.onrender.com/.well-known/x402
+curl https://repps.xyz/.well-known/x402
 
 # Health
-curl https://repps.onrender.com/health
+curl https://repps.xyz/health
 ```
 
 ## Live artifacts
 
 | Artifact | URL |
 |---|---|
-| Live demo | `https://repps.onrender.com` |
-| Interactive demo | `https://repps.onrender.com/demo` |
-| x402 manifest | `https://repps.onrender.com/.well-known/x402` |
+| Live demo | `https://repps.xyz` |
+| Interactive demo | `https://repps.xyz/demo` |
+| x402 manifest | `https://repps.xyz/.well-known/x402` |
 | Source code | `https://github.com/ademidun69/repps` |
 | README | `https://github.com/ademidun69/repps#readme` |
 | Demo video (X post) | (link added after recording) |
