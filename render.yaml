@@ -1,0 +1,20 @@
+# Render deployment config for ReppS
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: repps
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    buildCommand: echo "no build step — pure node 18"
+    startCommand: node src/server.js
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "18"
+      - key: RECEIVE_ADDRESS
+        sync: false   # set in Render dashboard — your X Layer wallet
+      - key: OPENAI_API_KEY
+        sync: false   # optional — enables LLM upgrade mode
