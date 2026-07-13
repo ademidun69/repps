@@ -4,9 +4,9 @@
 
 ## Setup (before recording)
 
-1. Open phone browser → `https://repps.onrender.com/demo`
+1. Open phone browser → `https://repps.xyz/demo`
 2. Have the page loaded with the default "Memecoin ape" scenario selected
-3. Optional: open `https://repps.onrender.com` in another tab to show the landing page
+3. Optional: open `https://repps.xyz` in another tab to show the landing page
 
 ## Script (~85 seconds)
 
@@ -34,7 +34,7 @@
 ### Beat 5 (55–70s) — Show the x402 payment flow
 **On screen**: open terminal / Termux, run:
 ```bash
-curl -i -X POST https://repps.onrender.com/api/challenge \
+curl -i -X POST https://repps.xyz/api/challenge \
   -H "Content-Type: application/json" \
   -d '{"action_type":"swap","params":{"token_out":"MEME","slippage_pct":12,"pool_liquidity_usd":8000,"amount":"10000"},"context":{"agent_id":"demo"}}'
 ```
@@ -50,7 +50,7 @@ curl -i -X POST https://repps.onrender.com/api/challenge \
 ### End card (85–90s)
 **On screen**: 
 - Logo + URL
-- "Try it free: repps.onrender.com/demo"
+- "Try it free: repps.xyz/demo"
 - "#OKXAI"
 
 ---
