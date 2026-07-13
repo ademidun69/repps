@@ -8,7 +8,7 @@
 
 ## Q: Your name (or builder handle)
 ```
-O.A Dolapo (networkbike)
+O.A Dolapo (ademidun69)
 ```
 
 ## Q: Project / ASP name
@@ -93,7 +93,7 @@ Manifest: https://repps.onrender.com/.well-known/x402
 ## Q: Anything else?
 ```
 ReppS is open source (MIT). Source: https://github.com/ademidun69/repps
-Built in 4 days for the OKX.AI Genesis Hackathon by O.A Dolapo (networkbike).
+Built in 4 days for the OKX.AI Genesis Hackathon by O.A Dolapo (ademidun69).
 ```
 
 ---
