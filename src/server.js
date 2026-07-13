@@ -213,7 +213,7 @@ function serveManifest(res) {
       },
     ],
     x402_endpoint_example: {
-      url: 'https://repps.onrender.com/api/challenge',
+      url: 'https://repps.xyz/api/challenge',
       method: 'POST',
       payment: {
         x402Version: 2,
