@@ -64,6 +64,7 @@ const LANDING_HTML = `<!doctype html>
     <a href="#how">How it works</a>
     <a href="#pricing">Pricing</a>
     <a href="#api">API</a>
+    <a href="/test">Test guide</a>
     <a href="https://github.com/ademidun69/repps" target="_blank" rel="noopener">GitHub ↗</a>
     <div class="right">
       <span class="pill">OKX.AI Hackathon 2026</span>
@@ -93,51 +94,36 @@ const LANDING_HTML = `<!doctype html>
   </div>
 
   <h2 id="how">How an agent calls ReppS</h2>
-  <pre><code>POST https://repps.xyz/api/challenge
-Content-Type: application/json
+  <pre><code># Step 1: Free trial — no payment, no signup
+curl -X POST https://repps.xyz/api/quick_check \
+  -H "Content-Type: application/json" \
+  -d '{"action_type":"swap","params":{"token_out":"MEME","slippage_pct":12,"pool_liquidity_usd":8000},"context":{"agent_id":"reviewer"}}'
 
-{
-  "action_type": "swap",
-  "params": {
-    "amount": "10000",
-    "token_in": "USDT",
-    "token_out": "MEME",
-    "slippage_pct": 12,
-    "pool_liquidity_usd": 8000,
-    "chain": "x-layer"
-  },
-  "context": {
-    "agent_id": "trader-bot-7",
-    "wallet": "0xabc...",
-    "intent": "user said 'ape into the new meme'"
-  }
-}
+# Step 2: Full paid review — POST without payment returns HTTP 402 challenge
+curl -i -X POST https://repps.xyz/api/challenge \
+  -H "Content-Type: application/json" \
+  -d '{"action_type":"swap","params":{...},"context":{...}}'
 
-# → if no PAYMENT-SIGNATURE header, server returns HTTP 402:
-{
-  "x402Version": 2,
-  "resource": { "url": "...", "description": "Adversarial review..." },
-  "accepts": [{
-    "scheme": "exact",
-    "network": "eip155:196",
-    "amount": "10000",     ← 0.01 USDT (decimals=6)
-    "asset": "USDT0",
-    "payTo": "0x&lt;your X Layer wallet&gt;",
-    "maxTimeoutSeconds": 300,
-    "extra": { "name": "USD₮0", "version": "1" }
-  }]
-}
+# → HTTP/2 402
+# payment-required: eyJ4NDAyVmVyc2lvbiI6MiwicmVzb3VyY2UiOns...
+# { "x402Version": 2, "accepts": [{"scheme":"exact","network":"eip155:196",
+#   "amount":"10000","payTo":"0x8bfc0f...","asset":"USDT0","maxTimeoutSeconds":300,
+#   "extra":{"name":"USD₮0","version":"1"}}] }
 
-# → agent pays 0.01 USDT, replays with PAYMENT-SIGNATURE header
-# → server returns 200:
+# Step 3: Agent pays 0.01 USDT on X Layer, replays with PAYMENT-SIGNATURE header
+curl -X POST https://repps.xyz/api/challenge \
+  -H "Content-Type: application/json" \
+  -H "PAYMENT-SIGNATURE: $(curl -s https://repps.xyz/api/test/receipt?tool=challenge | python3 -c 'import json,sys; print(json.load(sys.stdin)["receipt_b64"])')" \
+  -d '{"action_type":"swap","params":{"token_out":"MEME","slippage_pct":12,"pool_liquidity_usd":8000},"context":{"agent_id":"reviewer"}}'
+
+# → 200 OK with full review
 {
   "verdict": "ABORT",
   "confidence": 0.92,
   "score": 85,
   "risks": [
     "Slippage tolerance 12% is dangerously high. Front-runner bait.",
-    "Trade size is 125.00% of pool liquidity. Expect massive price impact.",
-    "Output token matches known-meme pattern with no audit data."
+    "Trade size is 125% of pool liquidity. Expect massive price impact."
   ],
   "alternatives": [
     "Use a DEX aggregator (1inch, 0x) for best routing",
@@ -150,6 +136,10 @@ Content-Type: application/json
   ],
   "reasoning": "Rule engine + LLM both flagged high slippage, illiquid pool, and untested token. Consensus: ABORT."
 }</code></pre>
+
+  <p style="color:var(--muted); font-size:13px; margin-top:-12px;">
+    Reviewers: <a href="/test" style="color:var(--accent);">see the full test guide</a> for copy-pasteable cURL for every endpoint, including the <code>?test=1</code> bypass and <a href="/api/test/receipt?tool=challenge">test receipt generator</a>.
+  </p>
 
   <h2 id="pricing">Pricing</h2>
   <div class="pricing">
