@@ -22,7 +22,7 @@ Hire an unverified agent? ReppS says REVIEW.
 
 Try it → https://repps.onrender.com/demo
 
-Built for #OKXAI Genesis Hackathon. by @networkbike
+Built for #OKXAI Genesis Hackathon. by @ademidun69
 ```
 
 ---
