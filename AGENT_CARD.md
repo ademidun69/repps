@@ -21,7 +21,7 @@
 | Field | Value |
 |---|---|
 | **Name** | O.A Dolapo |
-| **GitHub** | `networkbike` |
+| **GitHub** | `ademidun69` |
 | **Contact** | via GitHub issues |
 
 ## Service List (tools exposed)
