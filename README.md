@@ -118,7 +118,7 @@ The result merges both: takes the more conservative verdict, unions all risks.
 
 ## License
 
-MIT — O.A Dolapo (networkbike)
+MIT — O.A Dolapo (ademidun69)
 
 ## Links
 
