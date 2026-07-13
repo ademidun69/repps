@@ -1,0 +1,30 @@
+{
+  "name": "repps",
+  "version": "1.0.0",
+  "description": "ReppS — Adversarial Cognitive Layer for AI Agents. The devil's advocate your agent calls before it acts.",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "smoke": "node scripts/smoke-test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "okx",
+    "okxai",
+    "x402",
+    "agent",
+    "ai-agent",
+    "asp",
+    "agent-service-provider",
+    "x-layer",
+    "adversarial",
+    "pre-flight"
+  ],
+  "author": "O.A Dolapo (ademidun69)",
+  "license": "MIT",
+  "dependencies": {}
+}
