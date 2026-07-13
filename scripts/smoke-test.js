@@ -222,6 +222,109 @@ const tests = [
     });
     assert(r.status === 400, 'status 400');
   }},
+
+  // ── new endpoints (v1.1.0) ─────────────────────────────────────
+  { name: 'GET /test (reviewer guide)', run: async () => {
+    const r = await fetch(BASE + '/test');
+    const html = await r.text();
+    assert(r.status === 200, 'status 200');
+    assert(html.includes('ReppS'), 'has brand');
+    assert(html.includes('curl -i'), 'has curl example');
+    assert(html.includes('/api/test/receipt'), 'mentions test receipt');
+  }},
+  { name: 'GET /agent-card', run: async () => {
+    const r = await fetch(BASE + '/agent-card');
+    const d = await r.json();
+    assert(r.status === 200, 'status 200');
+    assert(d.service_name === 'ReppS', 'service name');
+    assert(d.x402.network === 'eip155:196', 'X Layer');
+    assert(d.pricing.challenge === '0.01 USDT/call', 'pricing');
+    assert(d.receive_address && d.receive_address.startsWith('0x'), 'wallet');
+  }},
+  { name: 'GET /api/test/receipt?tool=challenge', run: async () => {
+    const r = await fetch(BASE + '/api/test/receipt?tool=challenge');
+    const d = await r.json();
+    assert(r.status === 200, 'status 200');
+    assert(d.tool === 'challenge', 'tool');
+    assert(d.amount_usdt === 0.01, '0.01 USDT');
+    assert(d.receipt.check_id, 'has check_id');
+    assert(d.receipt.signature && d.receipt.signature.startsWith('0x'), 'has signature');
+    assert(d.receipt_b64, 'has base64 receipt');
+    assert(d.curl_example && d.curl_example.includes('PAYMENT-SIGNATURE'), 'has curl example');
+  }},
+  { name: 'GET /api/test/receipt?tool=bundle', run: async () => {
+    const r = await fetch(BASE + '/api/test/receipt?tool=bundle');
+    const d = await r.json();
+    assert(d.amount_usdt === 0.05, '0.05 USDT');
+  }},
+  { name: 'GET /api/test/receipt?tool=audit', run: async () => {
+    const r = await fetch(BASE + '/api/test/receipt?tool=audit');
+    const d = await r.json();
+    assert(d.amount_usdt === 0.02, '0.02 USDT');
+  }},
+  { name: 'GET /api/test/receipt?tool=invalid → 400', run: async () => {
+    const r = await fetch(BASE + '/api/test/receipt?tool=invalid');
+    assert(r.status === 400, 'status 400');
+  }},
+  { name: 'challenge: test bypass returns 200 + test_bypass flag', run: async () => {
+    if (process.env.REPPS_TEST !== '1' && !process.env.SKIP_REMOTE_TEST) {
+      console.log('  ⊘ skipped (remote server may have test bypass disabled)');
+      return;
+    }
+    const r = await fetch(BASE + '/api/challenge?test=1', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action_type: 'swap', params: { token_out: 'MEME', slippage_pct: 12, pool_liquidity_usd: 8000 }, context: { agent_id: 'test' } }),
+    });
+    const d = await r.json();
+    assert(r.status === 200, 'status 200');
+    assert(d.test_bypass === true, 'test_bypass flag set');
+    assert(d.paid === false, 'paid false');
+    assert(d.verdict, 'has verdict');
+  }},
+  { name: 'challenge: real receipt via /api/test/receipt works', run: async () => {
+    if (process.env.REPPS_TEST !== '1' && !process.env.SKIP_REMOTE_TEST) {
+      console.log('  ⊘ skipped (remote server may have test bypass disabled)');
+      return;
+    }
+    // Get a receipt
+    const r1 = await fetch(BASE + '/api/test/receipt?tool=challenge');
+    const { receipt_b64 } = await r1.json();
+    // Use it
+    const r2 = await fetch(BASE + '/api/challenge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'PAYMENT-SIGNATURE': receipt_b64 },
+      body: JSON.stringify({ action_type: 'swap', params: { token_out: 'MEME', slippage_pct: 12, pool_liquidity_usd: 8000 }, context: { agent_id: 'paid' } }),
+    });
+    const d = await r2.json();
+    assert(r2.status === 200, 'status 200 (got ' + r2.status + ')');
+    assert(d.paid === true, 'paid true');
+    assert(d.receipt_verified === true, 'receipt verified');
+    assert(d.verdict, 'has verdict');
+  }},
+  { name: 'POST /api/echo', run: async () => {
+    const r = await fetch(BASE + '/api/echo', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ test: 123, message: 'hello' }),
+    });
+    const d = await r.json();
+    assert(r.status === 200, 'status 200');
+    assert(d.ok === true, 'ok');
+    assert(d.echo.test === 123, 'echoes back');
+  }},
+  { name: 'GET /health includes uptime + counters', run: async () => {
+    const r = await fetch(BASE + '/health');
+    const d = await r.json();
+    assert(d.version === '1.1.0', 'version 1.1.0');
+    assert(typeof d.uptime_seconds === 'number', 'has uptime');
+    assert(d.test_bypass_enabled === true, 'test_bypass enabled');
+    assert(typeof d.request_count === 'number', 'has request count');
+  }},
+  { name: 'OPTIONS preflight returns 204 + CORS', run: async () => {
+    const r = await fetch(BASE + '/api/challenge', { method: 'OPTIONS' });
+    assert(r.status === 204, 'status 204');
+    assert(r.headers.get('access-control-allow-origin') === '*', 'CORS allow origin');
+    assert(r.headers.get('access-control-allow-headers').includes('PAYMENT-SIGNATURE'), 'CORS allows payment header');
+  }},
 ];
 
 // ── runner ─────────────────────────────────────────────────────
