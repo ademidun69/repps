@@ -20,7 +20,7 @@ Hire an unverified agent? ReppS says REVIEW.
 🆓 Free tier: 3 checks/day, no signup
 📋 Audit-ready output (SOC2-lite)
 
-Try it → https://repps.onrender.com/demo
+Try it → https://repps.xyz/demo
 
 Built for #OKXAI Genesis Hackathon. by @ademidun69
 ```
@@ -41,7 +41,7 @@ POST your planned action → get a verdict (PROCEED/REVIEW/ABORT), confidence sc
 Pay per call via x402 on X Layer. 0.01 USDT.
 Free tier: 3/day. No signup.
 
-Live demo → https://repps.onrender.com
+Live demo → https://repps.xyz
 
 #OKXAI #x402
 ```
@@ -63,7 +63,7 @@ Every other agent service *does* work. ReppS *checks* work.
 
 It's the meta-layer the agent economy is missing.
 
-https://repps.onrender.com
+https://repps.xyz
 
 #OKXAI
 ```
@@ -117,5 +117,5 @@ Agents hire agents for sub-cent work. x402 makes this economically possible.
 - [ ] Demo video attached (recorded per DEMO-SCRIPT.md)
 - [ ] One of the three post versions used
 - [ ] Hashtag **#OKXAI** included
-- [ ] Link to https://repps.onrender.com included
+- [ ] Link to https://repps.xyz included
 - [ ] Post URL copied for the Google form
