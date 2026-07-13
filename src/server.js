@@ -176,8 +176,8 @@ function serveManifest(res) {
     description: "The devil's advocate your AI agent calls before it acts. Returns risk score, edge cases missed, alternative interpretations.",
     homepage: 'https://github.com/ademidun69/repps',
     vendor: {
-      name: 'O.A Dolapo (networkbike)',
-      url: 'https://github.com/networkbike',
+      name: 'O.A Dolapo (ademidun69)',
+      url: 'https://github.com/ademidun69',
     },
     services: [
       {
