@@ -59,9 +59,9 @@ If any step asks for a verification code, copy the code from your email and past
 
 | Field | Value |
 |---|---|
-| Service URL | `https://repps.onrender.com` |
-| Manifest URL | `https://repps.onrender.com/.well-known/x402` |
-| Health check | `https://repps.onrender.com/health` |
+| Service URL | `https://repps.xyz` |
+| Manifest URL | `https://repps.xyz/.well-known/x402` |
+| Health check | `https://repps.xyz/health` |
 | Network | eip155:196 (X Layer) |
 | Asset | USDT0 |
 | Pricing | 0.01 / 0.05 / 0.02 USDT + free |
