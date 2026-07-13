@@ -188,7 +188,7 @@ POST /api/audit               → $0.02 USDT · audit log</code></pre>
   <div class="meta">
     <span>Built for <a href="https://okx.ai" target="_blank" rel="noopener">OKX.AI Genesis Hackathon</a> · Jul 2026</span>
     <span>x402 v2 · X Layer mainnet (eip155:196) · USDT0</span>
-    <span>By O.A Dolapo · <a href="https://github.com/networkbike" target="_blank" rel="noopener">@networkbike</a></span>
+    <span>By O.A Dolapo · <a href="https://github.com/ademidun69" target="_blank" rel="noopener">@ademidun69</a></span>
   </div>
 </div>
 </body>
