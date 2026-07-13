@@ -18,7 +18,7 @@ ReppS
 
 ## Q: Project URL (live demo)
 ```
-https://repps.onrender.com
+https://repps.xyz
 ```
 
 ## Q: GitHub repository
@@ -77,7 +77,7 @@ Endpoints:
   - POST /api/challenge ($0.01)
   - POST /api/bundle ($0.05)
   - POST /api/audit ($0.02)
-Manifest: https://repps.onrender.com/.well-known/x402
+Manifest: https://repps.xyz/.well-known/x402
 ```
 
 ## Q: X post link (your participation post)
