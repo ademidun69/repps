@@ -31,7 +31,7 @@ The missing piece isn't more capability. It's a **pre-flight review** that pushe
 
 ```bash
 # 1) Agent sends a planned action, no payment header
-curl -X POST https://repps.onrender.com/api/challenge \
+curl -X POST https://repps.xyz/api/challenge \
   -H "Content-Type: application/json" \
   -d '{
     "action_type": "swap",
@@ -122,7 +122,7 @@ MIT — O.A Dolapo (ademidun69)
 
 ## Links
 
-- Live: `https://repps.onrender.com`
+- Live: `https://repps.xyz`
 - Repo: `https://github.com/ademidun69/repps`
 - OKX.AI: `https://okx.ai/tutorial/asp`
 - Hackathon: `https://hackquest.io/hackathons/OKXAI-Genesis-Hackathon`
