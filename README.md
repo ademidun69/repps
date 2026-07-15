@@ -118,7 +118,7 @@ The result merges both: takes the more conservative verdict, unions all risks.
 
 ## License
 
-MIT — O.A Dolapo (ademidun69)
+MIT — Ademidun (ademidun69)
 
 ## Links
 
@@ -126,4 +126,3 @@ MIT — O.A Dolapo (ademidun69)
 - Repo: `https://github.com/ademidun69/repps`
 - OKX.AI: `https://okx.ai/tutorial/asp`
 - Hackathon: `https://hackquest.io/hackathons/OKXAI-Genesis-Hackathon`
-
