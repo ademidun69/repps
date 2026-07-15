@@ -20,7 +20,7 @@
 
 | Field | Value |
 |---|---|
-| **Name** | O.A Dolapo |
+| **Name** | Ademidun |
 | **GitHub** | `ademidun69` |
 | **Contact** | via GitHub issues |
 
