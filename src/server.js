@@ -251,7 +251,7 @@ function serveManifest(res) {
     homepage: 'https://repps.xyz',
     repo: 'https://github.com/ademidun69/repps',
     vendor: {
-      name: 'O.A Dolapo (ademidun69)',
+      name: 'Ademidun (ademidun69)',
       url: 'https://github.com/ademidun69',
     },
     services: [
@@ -339,7 +339,7 @@ function serveAgentCard(res) {
     manifest: 'https://repps.xyz/.well-known/x402',
     demo: 'https://repps.xyz/demo',
     repo: 'https://github.com/ademidun69/repps',
-    vendor: { name: 'O.A Dolapo (ademidun69)', email: 'ademidun965@gmail.com' },
+    vendor: { name: 'Ademidun (ademidun69)', email: 'ademidun965@gmail.com' },
     x402: { version: 2, network: 'eip155:196', asset: 'USDT0', decimals: 6, scheme: 'exact', max_timeout_seconds: 300 },
     receive_address: RECEIVE_ADDRESS,
     pricing: {
