@@ -136,7 +136,7 @@ const tests = [
     assert(ch.accepts[0].scheme === 'exact', 'scheme exact');
     assert(ch.accepts[0].amount === '10000', 'amount 0.01 USDT');
     assert(ch.accepts[0].payTo && ch.accepts[0].payTo.startsWith('0x'), 'payTo is address');
-    assert(ch.accepts[0].asset === 'USDT0', 'asset USDT0');
+    assert(ch.accepts[0].asset === '0x779ded0c9e1022225f8e0630b35a9b54be713736', 'asset is USDT0 contract address');
     assert(ch.accepts[0].maxTimeoutSeconds === 300, 'timeout 300s');
     // Header check
     const header = r.headers.get('payment-required');
@@ -145,7 +145,7 @@ const tests = [
   { name: 'challenge: invalid receipt → 402 invalid_receipt', run: async () => {
     const r = await fetch(BASE + '/api/challenge', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'PAYMENT-SIGNATURE': '{"check_id":"x","amount":"10000","asset":"USDT0","network":"eip155:196","payTo":"0x0000000000000000000000000000000000000000","nonce":"n","signature":"0xsig"}' },
+      headers: { 'Content-Type': 'application/json', 'PAYMENT-SIGNATURE': '{"check_id":"x","amount":"10000","asset":"0x779ded0c9e1022225f8e0630b35a9b54be713736","network":"eip155:196","payTo":"0x0000000000000000000000000000000000000000","nonce":"n","signature":"0xsig"}' },
       body: JSON.stringify({ action_type: 'swap', params: { token_out: 'MEME' }, context: {} }),
     });
     // Either the verify rejects for bad payTo (matches default zero addr) or for amount mismatch
@@ -158,7 +158,7 @@ const tests = [
     const sig = JSON.stringify({
       check_id: 'test_' + Date.now(),
       amount: '10000',
-      asset: 'USDT0',
+      asset: '0x779ded0c9e1022225f8e0630b35a9b54be713736',
       network: 'eip155:196',
       payTo: '0x0000000000000000000000000000000000000000', // default test addr
       nonce: 'n1',
