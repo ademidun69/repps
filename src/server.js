@@ -267,7 +267,7 @@ function serveManifest(res) {
         name: 'Challenge (Paid)',
         description: 'Full adversarial review: risk score, edge cases, alternatives, adversarial questions, reasoning.',
         pricing: { amount: '0.01', currency: 'USDT0', per: 'call' },
-        x402: { network: 'eip155:196', scheme: 'exact', asset: 'USDT0', decimals: 6, amount_min: '10000' },
+        x402: { network: 'eip155:196', scheme: 'exact', asset: '0x779ded0c9e1022225f8e0630b35a9b54be713736', decimals: 6, amount_min: '10000' },
         endpoint: { method: 'POST', url: '/api/challenge', body_schema: 'see /test' },
       },
       {
@@ -275,7 +275,7 @@ function serveManifest(res) {
         name: 'Bundle of 5 (Paid)',
         description: '5 challenge calls bundled, 50% cheaper. Best for agents doing batch reviews with different framings.',
         pricing: { amount: '0.05', currency: 'USDT0', per: 'bundle' },
-        x402: { network: 'eip155:196', scheme: 'exact', asset: 'USDT0', decimals: 6, amount_min: '50000' },
+        x402: { network: 'eip155:196', scheme: 'exact', asset: '0x779ded0c9e1022225f8e0630b35a9b54be713736', decimals: 6, amount_min: '50000' },
         endpoint: { method: 'POST', url: '/api/bundle', body_schema: 'see /test' },
       },
       {
@@ -283,7 +283,7 @@ function serveManifest(res) {
         name: 'Audit Log (Paid)',
         description: 'Format a set of past challenges into an audit-ready log (SOC2-lite format).',
         pricing: { amount: '0.02', currency: 'USDT0', per: 'log' },
-        x402: { network: 'eip155:196', scheme: 'exact', asset: 'USDT0', decimals: 6, amount_min: '20000' },
+        x402: { network: 'eip155:196', scheme: 'exact', asset: '0x779ded0c9e1022225f8e0630b35a9b54be713736', decimals: 6, amount_min: '20000' },
         endpoint: { method: 'POST', url: '/api/audit', body_schema: 'see /test' },
       },
     ],
@@ -298,7 +298,7 @@ function serveManifest(res) {
             network: 'eip155:196',
             amount: '10000',
             payTo: RECEIVE_ADDRESS,
-            asset: 'USDT0',
+            asset: '0x779ded0c9e1022225f8e0630b35a9b54be713736',
             maxTimeoutSeconds: 300,
             extra: { name: 'USD₮0', version: '1' },
           },
@@ -340,7 +340,7 @@ function serveAgentCard(res) {
     demo: 'https://repps.xyz/demo',
     repo: 'https://github.com/ademidun69/repps',
     vendor: { name: 'Ademidun (ademidun69)', email: 'ademidun965@gmail.com' },
-    x402: { version: 2, network: 'eip155:196', asset: 'USDT0', decimals: 6, scheme: 'exact', max_timeout_seconds: 300 },
+    x402: { version: 2, network: 'eip155:196', asset: '0x779ded0c9e1022225f8e0630b35a9b54be713736', decimals: 6, scheme: 'exact', max_timeout_seconds: 300 },
     receive_address: RECEIVE_ADDRESS,
     pricing: {
       quick_check: 'free (3/day/IP)',
@@ -392,7 +392,7 @@ function serveTestGuide(res) {
 <div class="step">
   <h3>Sanity check</h3>
   <pre>curl https://repps.xyz/health</pre>
-  <p>Expect: <code>status: ok</code>, <code>network: eip155:196</code>, <code>asset: USDT0</code>, <code>uptime_seconds</code> growing.</p>
+  <p>Expect: <code>status: ok</code>, <code>network: eip155:196</code>, <code>asset: 0x779de...713736</code> (USDT0 contract), <code>uptime_seconds</code> growing.</p>
 </div>
 
 <h2>1. x402 v2 spec compliance (30 sec)</h2>
@@ -517,7 +517,7 @@ function serveTestReceipt(res, query) {
   const receipt = {
     check_id: checkId,
     amount,
-    asset: 'USDT0',
+    asset: '0x779ded0c9e1022225f8e0630b35a9b54be713736',
     network: 'eip155:196',
     payTo: RECEIVE_ADDRESS,
     nonce,
