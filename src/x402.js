@@ -59,6 +59,11 @@ export function x402Challenge(res, opts) {
   };
   // PAYMENT-REQUIRED header must be base64-encoded per x402 v2 spec
   // (HTTP header values cannot contain raw quotes or newlines)
+  // Override `asset` with the official USDT0 contract address on X Layer
+  // (OKX requires this exact address for the marketplace review)
+  if (challenge.accepts && challenge.accepts[0]) {
+    challenge.accepts[0].asset = '0x779ded0c9e1022225f8e0630b35a9b54be713736';
+  }
   const headerB64 = Buffer.from(JSON.stringify(challenge)).toString('base64');
   res.writeHead(402, {
     'Content-Type': 'application/json',
