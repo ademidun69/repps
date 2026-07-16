@@ -33,7 +33,7 @@ import { x402Challenge, verifyReceipt, freeQuotaOk, getAuditTrail } from './x402
 const PORT = process.env.PORT || 10000;
 const RECEIVE_ADDRESS = process.env.RECEIVE_ADDRESS || '0x0000000000000000000000000000000000000000';
 const NETWORK = 'eip155:196'; // X Layer mainnet
-const ASSET = 'USDT0';
+const ASSET = '0x779ded0c9e1022225f8e0630b35a9b54be713736'; // USDT0 contract on X Layer (OKX requires this exact address)
 const VERSION = '1.1.0';
 const SERVICE_START = Date.now();
 const TEST_BYPASS_ENABLED = process.env.REJECT_TEST_BYPASS !== '1';
