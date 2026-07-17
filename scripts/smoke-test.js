@@ -31,7 +31,7 @@ const tests = [
     const data = await r.json();
     assert(r.status === 200, 'status 200');
     assert(data.x402Version === 2, 'x402 v2');
-    assert(Array.isArray(data.services) && data.services.length === 4, '4 services listed');
+    assert(Array.isArray(data.services) && data.services.length === 5, '5 services listed');
     const ch = data.services.find(s => s.id === 'challenge');
     assert(ch.x402.network === 'eip155:196', 'challenge on X Layer');
     assert(ch.x402.scheme === 'exact', 'scheme exact');
@@ -204,6 +204,77 @@ const tests = [
     assert(r.status === 402, `status 402 (got ${r.status})`);
     const ch = await r.json();
     assert(ch.accepts[0].amount === '20000', 'amount 0.02 USDT');
+  }},
+
+  // ── tx_simulator endpoint ────────────────────────────────────
+  { name: 'GET /api/tx_simulator (discovery) → 402 with $0.03 challenge', run: async () => {
+    const r = await fetch(BASE + '/api/tx_simulator');
+    assert(r.status === 402, `status 402 (got ${r.status})`);
+    const ch = await r.json();
+    assert(ch.accepts[0].amount === '30000', 'amount 0.03 USDT');
+    assert(ch.accepts[0].asset === '0x779ded0c9e1022225f8e0630b35a9b54be713736', 'asset is USDT0 contract');
+  }},
+  { name: 'tx_simulator: high slippage → REVIEW or ABORT', run: async () => {
+    const r = await fetch(BASE + '/api/tx_simulator?test=1', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action_type: 'swap', params: { token_in: 'USDT', token_out: 'OKB', amount_in: 1000, slippage_bps: 800 } }),
+    });
+    assert(r.status === 200, `status 200 (got ${r.status})`);
+    const d = await r.json();
+    assert(d.mev_risk === 'high', 'mev_risk high for 8% slippage');
+    assert(['REVIEW','ABORT'].includes(d.verdict), `verdict is REVIEW or ABORT (got ${d.verdict})`);
+  }},
+  { name: 'tx_simulator: dust trade → low success prob', run: async () => {
+    const r = await fetch(BASE + '/api/tx_simulator?test=1', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action_type: 'swap', params: { token_in: 'USDT', token_out: 'OKB', amount_in: 0.001 } }),
+    });
+    const d = await r.json();
+    assert(d.success_probability < 0.5, `success prob < 0.5 (got ${d.success_probability})`);
+  }},
+  { name: 'tx_simulator: phishing token → ABORT', run: async () => {
+    const r = await fetch(BASE + '/api/tx_simulator?test=1', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action_type: 'swap', params: { token_in: 'FREEAIRDROP', token_out: 'USDT', amount_in: 1000 } }),
+    });
+    const d = await r.json();
+    assert(d.verdict === 'ABORT', `verdict ABORT (got ${d.verdict})`);
+    assert(d.flags.includes('possible_phishing_token'), 'flagged as phishing');
+  }},
+  { name: 'tx_simulator: clean swap → PROCEED', run: async () => {
+    const r = await fetch(BASE + '/api/tx_simulator?test=1', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action_type: 'swap', params: { token_in: 'USDT', token_out: 'OKB', amount_in: 100, slippage_bps: 50 } }),
+    });
+    const d = await r.json();
+    assert(d.verdict === 'PROCEED', `verdict PROCEED (got ${d.verdict})`);
+    assert(d.gas_estimate_usdt > 0, 'has gas estimate');
+  }},
+  { name: 'tx_simulator: unlimited approval → flag', run: async () => {
+    const r = await fetch(BASE + '/api/tx_simulator?test=1', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action_type: 'approve', params: { token: 'USDT', spender: '0x1234567890123456789012345678901234567890', amount: 'unlimited' } }),
+    });
+    const d = await r.json();
+    assert(d.flags.includes('unlimited_approval'), 'flagged as unlimited approval');
+  }},
+  { name: 'tx_simulator: burn address transfer → flag', run: async () => {
+    const r = await fetch(BASE + '/api/tx_simulator?test=1', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action_type: 'transfer', params: { to: '0x0000000000000000000000000000000000000000', amount: 100 } }),
+    });
+    const d = await r.json();
+    const burnRisk = d.risks.find((r) => r.category === 'burn');
+    assert(burnRisk, 'has burn risk');
+  }},
+  { name: 'tx_simulator: insufficient gas → 0 success', run: async () => {
+    const r = await fetch(BASE + '/api/tx_simulator?test=1', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action_type: 'transfer', params: { to: '0x1234567890123456789012345678901234567890', amount: 100 }, context: { wallet_balance_usdt: 0.001 } }),
+    });
+    const d = await r.json();
+    const gasRisk = d.risks.find((r) => r.category === 'insufficient_gas');
+    assert(gasRisk, 'has insufficient_gas risk');
   }},
 
   // ── 404 ──────────────────────────────────────────────────────
