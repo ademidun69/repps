@@ -1,6 +1,7 @@
 // Route handlers — one per x402 endpoint
 import { review } from './adversarial.js';
 import { getAuditTrail } from './x402.js';
+import { simulate } from './simulator.js';
 
 export async function handleChallenge(body) {
   return review(normalize(body));
@@ -46,6 +47,19 @@ export async function handleBundle(body) {
     timestamp: new Date().toISOString(),
     results,
     summary: summarizeBundle(results),
+  };
+}
+
+export async function handleSimulate(body) {
+  return simulate(normalizeSim(body));
+}
+
+function normalizeSim(body) {
+  // Accept either flat shape or wrapped {params, context}
+  return {
+    action_type: body.action_type || body.type || body.params?.action_type || 'unknown',
+    params: body.params || body.parameters || body.details || body,
+    context: body.context || {},
   };
 }
 
