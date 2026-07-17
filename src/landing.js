@@ -163,6 +163,11 @@ curl -X POST https://repps.xyz/api/challenge \
       <div class="amount">$0.02<small> /log</small></div>
       <ul><li>SOC2-lite formatted</li><li>Cites past checks by ID</li><li>Compliance-ready</li></ul>
     </div>
+    <div class="price">
+      <h4>TX Simulator</h4>
+      <div class="amount">$0.03<small> /sim</small></div>
+      <ul><li>Dry-run before signing</li><li>Success probability + gas + MEV risk</li><li>Honeypot &amp; unlimited-approval flags</li></ul>
+    </div>
   </div>
 
   <h2 id="api">Endpoints</h2>
@@ -173,7 +178,8 @@ GET  /health                  → liveness + config
 POST /api/quick_check         → free (3/day/IP)
 POST /api/challenge           → $0.01 USDT · full review
 POST /api/bundle              → $0.05 USDT · 5 framings
-POST /api/audit               → $0.02 USDT · audit log</code></pre>
+POST /api/audit               → $0.02 USDT · audit log
+POST /api/tx_simulator        → $0.03 USDT · tx dry-run</code></pre>
 
   <div class="meta">
     <span>Built for <a href="https://okx.ai" target="_blank" rel="noopener">OKX.AI Genesis Hackathon</a> · Jul 2026</span>
