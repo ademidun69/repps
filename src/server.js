@@ -13,6 +13,7 @@
 //   POST /api/challenge                → $0.01 USDT — full adversarial review
 //   POST /api/bundle                    → $0.05 USDT — 5 challenge calls
 //   POST /api/audit                     → $0.02 USDT — audit-ready log
+//   POST /api/tx_simulator              → $0.03 USDT — onchain tx dry-run
 //   POST /api/echo                      → simple echo for connectivity testing
 //
 // Test mode: pass ?test=1 to any paid endpoint to bypass payment (for reviewer/QA only).
@@ -27,7 +28,7 @@ import crypto from 'node:crypto';
 import { URL } from 'node:url';
 import { serveLanding } from './landing.js';
 import { serveDemo } from './demo.js';
-import { handleChallenge, handleQuickCheck, handleBundle, handleAudit } from './routes.js';
+import { handleChallenge, handleQuickCheck, handleBundle, handleSimulate, handleAudit } from './routes.js';
 import { x402Challenge, verifyReceipt, freeQuotaOk, getAuditTrail } from './x402.js';
 
 const PORT = process.env.PORT || 10000;
@@ -81,12 +82,13 @@ const server = http.createServer(async (req, res) => {
     // ── discovery: GET on paid endpoints returns x402 challenge + instructions
     // OKX.AI / onchainos reviewers and MCP clients probe with GET before paying.
     // Returning 404 made the reviewer fail with "unable to receive a response".
-    if (method === 'GET' && (path === '/api/challenge' || path === '/api/bundle' || path === '/api/audit')) {
-      const amountMap = { '/api/challenge': '10000', '/api/bundle': '50000', '/api/audit': '20000' };
+    if (method === 'GET' && (path === '/api/challenge' || path === '/api/bundle' || path === '/api/audit' || path === '/api/tx_simulator')) {
+      const amountMap = { '/api/challenge': '10000', '/api/bundle': '50000', '/api/audit': '20000', '/api/tx_simulator': '30000' };
       const descMap = {
         '/api/challenge': "Adversarial review of an agent's planned action. Returns risk score, edge cases, alternatives.",
         '/api/bundle': '5 challenge calls bundled at 50% off for batch reviews with different framings.',
         '/api/audit': 'Format past challenges into an audit-ready log (SOC2-lite). Cites checks with payment verification.',
+        '/api/tx_simulator': 'Dry-run simulation of an onchain tx. Returns success probability, gas, MEV risk, and common failure modes before you sign.',
       };
       return x402Challenge(res, {
         resource: `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}${path}`,
@@ -195,6 +197,37 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
+    // ── paid endpoint: /api/tx_simulator ($0.03) ─────────────
+    if (path === '/api/tx_simulator' && method === 'POST') {
+      return readJson(req, res, async (body) => {
+        const isTestBypass = TEST_BYPASS_ENABLED && (query.test === '1' || body._test === true);
+        const sig = req.headers['payment-signature'] || req.headers['x-payment'];
+        if (!sig && !isTestBypass) {
+          return x402Challenge(res, {
+            resource: `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}/api/tx_simulator`,
+            amount: '30000',
+            description: 'Dry-run simulation of an onchain tx. Returns success probability, gas, MEV risk, and common failure modes before you sign.',
+            payTo: RECEIVE_ADDRESS,
+            network: NETWORK,
+            asset: ASSET,
+          });
+        }
+        if (sig && !isTestBypass) {
+          const verify = await verifyReceipt(sig, { amount: '30000', payTo: RECEIVE_ADDRESS, network: NETWORK });
+          if (!verify.ok) {
+            return sendJson(res, 402, { error: 'invalid_receipt', message: verify.reason, hint: 'Generate a test receipt at GET /api/test/receipt?tool=tx_simulator' });
+          }
+        }
+        const result = await handleSimulate(body);
+        return sendJson(res, 200, {
+          ...result,
+          paid: !isTestBypass,
+          receipt_verified: !isTestBypass,
+          test_bypass: isTestBypass || undefined,
+        });
+      });
+    }
+
     // ── paid endpoint: /api/audit ($0.02) ─────────────────────────
     if (path === '/api/audit' && method === 'POST') {
       return readJson(req, res, async (body) => {
@@ -238,11 +271,12 @@ const server = http.createServer(async (req, res) => {
         'GET  /health',
         'GET  /.well-known/x402',
         'GET  /agent-card',
-        'GET  /api/test/receipt?tool=challenge|bundle|audit',
+        'GET  /api/test/receipt?tool=challenge|bundle|audit|tx_simulator',
         'POST /api/quick_check',
         'POST /api/challenge',
         'POST /api/bundle',
         'POST /api/audit',
+        'POST /api/tx_simulator',
         'POST /api/echo',
       ],
     });
@@ -317,6 +351,14 @@ function serveManifest(res) {
         pricing: { amount: '0.02', currency: 'USDT0', per: 'log' },
         x402: { network: 'eip155:196', scheme: 'exact', asset: '0x779ded0c9e1022225f8e0630b35a9b54be713736', decimals: 6, amount_min: '20000' },
         endpoint: { method: 'POST', url: '/api/audit', body_schema: 'see /test' },
+      },
+      {
+        id: 'tx_simulator',
+        name: 'TX Simulator (Paid)',
+        description: 'Dry-run simulation of an onchain tx. Returns success probability, gas estimate, MEV exposure, and common failure modes before signing.',
+        pricing: { amount: '0.03', currency: 'USDT0', per: 'simulation' },
+        x402: { network: 'eip155:196', scheme: 'exact', asset: '0x779ded0c9e1022225f8e0630b35a9b54be713736', decimals: 6, amount_min: '30000' },
+        endpoint: { method: 'POST', url: '/api/tx_simulator', body_schema: { action_type: 'string', params: 'object', context: 'object?' } },
       },
     ],
     x402_endpoint_example: {
@@ -531,12 +573,13 @@ function serveTestReceipt(res, query) {
     });
   }
   const tool = query.tool || 'challenge';
-  const amounts = { quick_check: '0', challenge: '10000', bundle: '50000', audit: '20000' };
+  const amounts = { quick_check: '0', challenge: '10000', bundle: '50000', audit: '20000', tx_simulator: '30000' };
   const descriptions = {
     quick_check: 'Free quick check',
     challenge: 'Adversarial review',
     bundle: '5-challenge bundle',
     audit: 'Audit log',
+    tx_simulator: 'TX simulator dry-run',
   };
   const amount = amounts[tool];
   if (amount === undefined) {
