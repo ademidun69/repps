@@ -78,7 +78,39 @@ const server = http.createServer(async (req, res) => {
       return readJson(req, res, (body) => sendJson(res, 200, { ok: true, echo: body, timestamp: new Date().toISOString() }));
     }
 
+    // ── discovery: GET on paid endpoints returns x402 challenge + instructions
+    // OKX.AI / onchainos reviewers and MCP clients probe with GET before paying.
+    // Returning 404 made the reviewer fail with "unable to receive a response".
+    if (method === 'GET' && (path === '/api/challenge' || path === '/api/bundle' || path === '/api/audit')) {
+      const amountMap = { '/api/challenge': '10000', '/api/bundle': '50000', '/api/audit': '20000' };
+      const descMap = {
+        '/api/challenge': "Adversarial review of an agent's planned action. Returns risk score, edge cases, alternatives.",
+        '/api/bundle': '5 challenge calls bundled at 50% off for batch reviews with different framings.',
+        '/api/audit': 'Format past challenges into an audit-ready log (SOC2-lite). Cites checks with payment verification.',
+      };
+      return x402Challenge(res, {
+        resource: `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}${path}`,
+        amount: amountMap[path],
+        description: descMap[path],
+        payTo: RECEIVE_ADDRESS,
+        network: NETWORK,
+        asset: ASSET,
+      });
+    }
+
     // ── free endpoint: /api/quick_check ───────────────────────────
+    if (path === '/api/quick_check' && method === 'GET') {
+      return sendJson(res, 200, {
+        service: 'quick_check',
+        free: true,
+        method: 'POST',
+        body_schema: { action_type: 'string', params: 'object', context: 'object?' },
+        example: { action_type: 'swap', params: { token_in: 'USDT', token_out: 'OKB', amount: 100, chain: 'xlayer' } },
+        quota: '3 calls per IP per day, resets 00:00 UTC',
+        upgrade: { challenge: 'POST /api/challenge ($0.01)', bundle: 'POST /api/bundle ($0.05 for 5)' },
+        manifest: 'https://repps.xyz/.well-known/x402',
+      });
+    }
     if (path === '/api/quick_check' && method === 'POST') {
       return readJson(req, res, async (body) => {
         const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '0.0.0.0').split(',')[0].trim();
