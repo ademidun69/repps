@@ -36,6 +36,7 @@ const RECEIVE_ADDRESS = process.env.RECEIVE_ADDRESS || '0x0000000000000000000000
 const NETWORK = 'eip155:196'; // X Layer mainnet
 const ASSET = '0x779ded0c9e1022225f8e0630b35a9b54be713736'; // USDT0 contract on X Layer (OKX requires this exact address)
 const VERSION = '1.1.0';
+const READY_AT = Date.now();
 const SERVICE_START = Date.now();
 const TEST_BYPASS_ENABLED = process.env.REJECT_TEST_BYPASS !== '1';
 
@@ -617,4 +618,23 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`[repps] version=${VERSION} network=${NETWORK} asset=${ASSET} receive=${RECEIVE_ADDRESS.slice(0, 8)}...`);
   console.log(`[repps] llm=${process.env.OPENAI_API_KEY ? 'openai' : 'rule-engine'} test_bypass=${TEST_BYPASS_ENABLED}`);
   console.log(`[repps] /test guide available at https://repps.xyz/test`);
+
+  // ── self-warmup: ping /health every 4 min so Render free tier doesn't sleep.
+  // Render free tier sleeps after ~15 min of no inbound traffic. Without this,
+  // an OKX reviewer probing our endpoint hits a 30-50s cold start and times out.
+  // We only ping ourselves in production (when PUBLIC_URL is set on Render).
+  const PUBLIC_URL = process.env.PUBLIC_URL;
+  if (PUBLIC_URL) {
+    const ping = () => {
+      const req = http.get(`${PUBLIC_URL}/health`, { timeout: 5000 }, (r) => r.resume());
+      req.on('error', () => {}); // silent
+      req.on('timeout', () => req.destroy());
+    };
+    // First ping after 60s, then every 4 min
+    setTimeout(() => {
+      ping();
+      setInterval(ping, 4 * 60 * 1000);
+    }, 60 * 1000);
+    console.log(`[repps] self-warmup enabled (pinging ${PUBLIC_URL}/health every 4 min)`);
+  }
 });
