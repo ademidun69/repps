@@ -73,10 +73,9 @@ export function x402Challenge(res, opts) {
 }
 
 export async function verifyReceipt(sigHeader, expected) {
-  // sigHeader format (x402 v2):
-  // base64({ "check_id": "...", "amount": "10000", "asset": "USDT0",
-  //          "network": "eip155:196", "payTo": "0x...", "nonce": "...",
-  //          "signature": "0x..." })
+  if (!sigHeader) {
+    return { ok: false, reason: 'missing payment-signature header' };
+  }
   try {
     let receipt;
     if (sigHeader.startsWith('{')) {
@@ -85,13 +84,42 @@ export async function verifyReceipt(sigHeader, expected) {
       receipt = JSON.parse(Buffer.from(sigHeader, 'base64').toString('utf8'));
     }
 
-    // Check required fields
+    // ── Format B: OKX x402 v2 standard ─────────────────────────────
+    // Envelope: { accepted: {...}, payload: { signature, authorization }, x402Version: 2 }
+    if (receipt && receipt.accepted && receipt.payload && receipt.x402Version === 2) {
+      const acc = receipt.accepted;
+      const pld = receipt.payload;
+      if (acc.amount !== expected.amount) {
+        return { ok: false, reason: `amount mismatch: expected ${expected.amount}, got ${acc.amount}` };
+      }
+      if ((acc.payTo || '').toLowerCase() !== (expected.payTo || '').toLowerCase()) {
+        return { ok: false, reason: `payTo mismatch: expected ${expected.payTo}, got ${acc.payTo}` };
+      }
+      if (acc.network !== expected.network) {
+        return { ok: false, reason: `network mismatch: expected ${expected.network}, got ${acc.network}` };
+      }
+      if (!pld.signature || !pld.signature.startsWith('0x') || pld.signature.length < 130) {
+        return { ok: false, reason: 'missing or invalid EIP-3009 signature' };
+      }
+      // Replay protection via the authorization nonce (v2 has no check_id)
+      const authNonce = pld.authorization?.nonce || pld.signature;
+      if (RECEIPT_LOG.has(authNonce)) {
+        return { ok: false, reason: 'receipt already used (replay protection)' };
+      }
+      RECEIPT_LOG.set(authNonce, {
+        format: 'okx-v2',
+        accepted: acc,
+        payload: pld,
+        verified_at: new Date().toISOString(),
+      });
+      return { ok: true, receipt, format: 'okx-v2' };
+    }
+
+    // ── Format A: legacy custom (kept for backward compat) ─────────
     const required = ['check_id', 'amount', 'asset', 'network', 'payTo', 'nonce', 'signature'];
     for (const k of required) {
       if (!receipt[k]) return { ok: false, reason: `missing field: ${k}` };
     }
-
-    // Match expected payment params
     if (receipt.amount !== expected.amount) {
       return { ok: false, reason: `amount mismatch: expected ${expected.amount}, got ${receipt.amount}` };
     }
@@ -101,16 +129,15 @@ export async function verifyReceipt(sigHeader, expected) {
     if (receipt.network !== expected.network) {
       return { ok: false, reason: `network mismatch: expected ${expected.network}, got ${receipt.network}` };
     }
-
-    // Replay protection: reject if we've seen this check_id
     if (RECEIPT_LOG.has(receipt.check_id)) {
       return { ok: false, reason: 'receipt already used (replay protection)' };
     }
-
-    // Stamp the receipt for audit
-    RECEIPT_LOG.set(receipt.check_id, { ...receipt, verified_at: new Date().toISOString() });
-
-    return { ok: true, receipt };
+    RECEIPT_LOG.set(receipt.check_id, {
+      format: 'legacy-custom',
+      ...receipt,
+      verified_at: new Date().toISOString(),
+    });
+    return { ok: true, receipt, format: 'legacy-custom' };
   } catch (e) {
     return { ok: false, reason: `parse error: ${e.message}` };
   }
